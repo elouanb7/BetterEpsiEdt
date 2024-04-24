@@ -115,6 +115,64 @@ function addDays(weekSchedule){
     return scheduleByDay
 }
 
+function getColorByIndex(index) {
+    const colors =[
+        "#184082ff",
+        "#ba6e33ff",
+        "#ffbe0bff",
+        "#fb5607ff",
+        "#ff3636ff",
+        "#ff006eff",
+        "#8338ecff",
+        "#3a86ffff",
+        "#68ff6bff",
+        "#c6fffaff"
+    ];
+    return colors[index % colors.length];
+}
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+// Function to shuffle predefined colors
+function shuffleColors() {
+    const colors = [
+        { color: "#184082ff", textColor: "white" },
+        { color: "#ba6e33ff", textColor: "white" },
+        { color: "#ffbe0bff", textColor: "black" },
+        { color: "#fb5607ff", textColor: "white" },
+        { color: "#ff3636ff", textColor: "white" },
+        { color: "#ff006eff", textColor: "white" },
+        { color: "#8338ecff", textColor: "white" },
+        { color: "#3a86ffff", textColor: "black" },
+        { color: "#68ff6bff", textColor: "black" },
+        { color: "#c6fffaff", textColor: "black" }
+    ];
+    return shuffle([...colors]); // Shuffle a copy of the colors array
+}
+
+function addColorsToSchedule(weekSchedule) {
+    const matiereColors = {}; // Object to store colors for each matiere
+    const colors = shuffleColors(); // Shuffle predefined colors
+
+    weekSchedule.forEach(day => {
+        day.courses.forEach(course => {
+            if (!matiereColors.hasOwnProperty(course.matiere)) {
+                // Assign a new color if matiere is encountered for the first time
+                matiereColors[course.matiere] = colors.pop(); // Pop a color from the shuffled list
+            }
+            course.color = matiereColors[course.matiere];
+        });
+    });
+
+    return weekSchedule;
+}
+
 export default async function fetchAndParseSchedule(tel) {
     const workingDays = getWorkingDays();
     let weekSchedule = []
@@ -123,6 +181,7 @@ export default async function fetchAndParseSchedule(tel) {
             weekSchedule.push(workingDay);
         })
     }
-    return addDays(weekSchedule);
+    weekSchedule = addDays(weekSchedule);
+    return addColorsToSchedule(weekSchedule);
 }
 
