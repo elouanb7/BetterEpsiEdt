@@ -20,7 +20,7 @@ export default defineConfig({
     server: {
         proxy: {
             '/edt': {
-                target: 'https://elouanb7.github.io/BetterEpsiEdt/',
+                target: 'https://elouanb7.github.io',
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/edt/, '')
             }
