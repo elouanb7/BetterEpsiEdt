@@ -69,8 +69,11 @@ function getWorkingDays() {
 async function fetchAndParseOneWorkingDay(tel, date) {
     const url = `https://edtmobiliteng.wigorservices.net//WebPsDyn.aspx?Action=posETUD&serverid=C&tel=${tel}&date=${date}%208:00`;
     try {
-        axios.defaults.headers.post['Content-Type'] = 'application/json;charset=utf-8';
-        axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
+        axios.defaults.headers.get['Content-Type'] = 'text/html; charset=utf-8';
+        axios.defaults.headers.get['Origin'] = 'https://elouanb7.github.io';
+        axios.defaults.headers.get['Access-Control-Allow-Methods'] = 'PUT, GET, HEAD, POST, DELETE, OPTIONS';
+        axios.defaults.headers.get['Access-Control-Allow-Origin'] = '*';
+        // axios.defaults.headers.get['Remote Address'] = '185.199.110.153'
         const response = await axios.get(url);
         const html = await response.data
         const parser = new DOMParser();

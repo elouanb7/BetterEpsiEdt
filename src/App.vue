@@ -14,7 +14,7 @@ export default {
         Thursday: null,
         Friday: null
       },
-      inputValue: ""
+      inputValue: "",
     }
   },
   created() {
@@ -24,11 +24,7 @@ export default {
       this.inputValue = nameParam;
     }
   },
-  async mounted() {
-    if (this.inputValue != null || this.inputValue !== "") {
-      this.retrieveSchedule(this.inputValue)
-    }
-  },
+  mounted() {},
   methods: {
     retrieveSchedule(name){
       fetchAndParseSchedule(name)

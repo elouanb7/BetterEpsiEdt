@@ -11,4 +11,9 @@ export default defineConfig({
     // Optionally configure the public path if needed
     publicDir: './',
   },
+  preview: {
+    host: 'localhost',
+    port: 5173,
+    strictPort: true,
+  },
 })
