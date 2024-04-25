@@ -13,22 +13,37 @@ export default {
         Wednesday: null,
         Thursday: null,
         Friday: null
-      }
+      },
+      inputValue: ""
+    }
+  },
+  created() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const nameParam = urlParams.get('name');
+    if (nameParam) {
+      this.inputValue = nameParam;
     }
   },
   async mounted() {
-    const nameSurname = 'elouan.bessettes';
-    fetchAndParseSchedule(nameSurname)
-        .then(schedule => {
-          schedule.forEach(entry => {
-            this.courses[entry.day] = entry.courses;
-          });
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
+    if (this.inputValue != null || this.inputValue !== "") {
+      this.retrieveSchedule(this.inputValue)
+    }
   },
   methods: {
+    retrieveSchedule(name){
+      fetchAndParseSchedule(name)
+          .then(schedule => {
+            if(schedule == null){
+              console.log("Invalid input.")
+            }
+            schedule.forEach(entry => {
+              this.courses[entry.day] = entry.courses;
+            });
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+    },
     calculateCourseHeight(course) {
       const startDate = this.convertHourToNumber(course.debut)
       const endDate = this.convertHourToNumber(course.fin)
@@ -47,8 +62,29 @@ export default {
       }
 
       return hourNumber;
+    },
+    convertHourToText(hourString) {
+      const [hours, minutes] = hourString.split(':');
+      return hours + 'h' + minutes
+    },
+    updateUrl() {
+      const baseUrl = window.location.href.split('?')[0];
+      const newUrl = baseUrl + '?name=' + encodeURIComponent(this.inputValue);
+      history.replaceState(null, '', newUrl);
     }
   },
+  watch: {
+    inputValue: function(newValue) {
+      clearTimeout(this.timeout);
+      this.timeout = setTimeout(() => {
+        this.retrieveSchedule(newValue);
+        this.updateUrl()
+      }, 1500);
+    }
+  },
+  beforeDestroy() {
+    clearTimeout(this.timeout);
+  }
 }
 
 
@@ -75,13 +111,17 @@ export default {
                :style="{ height: ((convertHourToNumber(course.debut) - convertHourToNumber(courses[day][index-1].fin)) * 30) + 'px' }"></div>
           <div class="course"
                :style="{ height: calculateCourseHeight(course) + 'px', backgroundColor: course.color.color, color: course.color.textColor}">
-            <span>{{ course.matiere }}</span>
-            <span>{{ course.salle }}</span>
-            <span>{{ course.prof }}</span>
+            <span>{{ course.matiere }}</span><br>
+            <span style="font-size: small">Salle : {{ course.salle }}</span><br>
+            <span style="font-size: x-small">Prof : {{ course.prof }}</span><br>
+            <span style="font-size: x-small">{{convertHourToText(course.debut)}}-{{convertHourToText(course.fin)}}</span>
           </div>
         </template>
         </div>
       </div>
+    </div>
+    <div class="form">
+      <input type="text" class="name-input" v-model="inputValue" placeholder="Enter your input">
     </div>
   </div>
 </template>
@@ -94,11 +134,12 @@ export default {
 }
 
 .time-column {
-  width: 50px /* Adjust width as needed */
+  width: 80px;
+  text-align: center;
 }
 
 .day {
-  width: calc(100% / 5 - 50px); /* Assuming 7 days in a week */
+  width: calc(100% / 5); /* Assuming 7 days in a week */
   text-align: center;
   margin-left: 1px;
 }
@@ -113,15 +154,36 @@ export default {
 }
 
 .day-column {
-  width: calc(100% / 5 - 50px);
+  width: calc(100% / 5);
   border-left: 1px solid #ccc;
 }
 
 .course {
   border-radius: 10px;
+  padding: 5px;
 }
 
 .course-empty {
   border: none;
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.name-input {
+  width: 15%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+}
+
+@media screen {
+
 }
 </style>
