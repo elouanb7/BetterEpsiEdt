@@ -22,6 +22,7 @@ function getWorkingDays() {
             for (let i = 0; i <= 4; i++) {
                 workingDays.push(addDays(currentDate, i));
             }
+            break;
         case 6: // Saturday
             currentDate.setDate(currentDate.getDate() + 2); // Move to Monday
             for (let i = 0; i <= 4; i++) {
