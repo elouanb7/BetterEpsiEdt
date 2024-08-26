@@ -117,7 +117,7 @@ export default {
       </div>
     </div>
     <div class="form">
-      <input type="text" class="name-input" v-model="inputValue" placeholder="Enter your input">
+      <input type="text" class="name-input" v-model="inputValue" placeholder='Enter your "firstname.lastname"'>
     </div>
   </div>
 </template>
