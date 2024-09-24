@@ -16,6 +16,7 @@ export default {
       },
       inputValue: "",
       dateInput: "",
+      coursesCount: 0,
       init: true,
     }
   },
@@ -52,8 +53,10 @@ export default {
             if (schedule == null) {
               console.log("Invalid input.")
             }
+            this.coursesCount = 0
             schedule.forEach(entry => {
               this.courses[entry.day] = entry.courses;
+              this.coursesCount += entry.courses.length;
             });
           })
           .catch(error => {
@@ -121,11 +124,11 @@ export default {
         <div class="time-column"></div>
         <div v-for="day in days" :key="day" class="day">{{ day }}</div>
       </div>
-      <div class="timetable-body">
+      <div ref="timetable" class="timetable-body">
         <div class="time-column">
           <div v-for="hour in hours" :key="hour" class="hour">{{ hour }}</div>
         </div>
-        <div v-for="day in days" :key="day" class="day-column">
+        <div v-if="coursesCount > 0" v-for="day in days" :key="day" class="day-column">
           <template v-for="(course, index) in courses[day]" :key="course.matiere + index">
             <div v-if="index === 0"
                  class="course-empty"
@@ -145,6 +148,9 @@ export default {
             </div>
           </template>
         </div>
+        <div class="empty-week" v-else>
+          Pas de cours cette semaine
+        </div>
       </div>
     </div>
     <div class="form">
@@ -163,6 +169,10 @@ export default {
 .header {
   display: flex;
   width: 100%;
+  height: 40px;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 10px;
 }
 
 .time-column {
@@ -230,6 +240,14 @@ export default {
 
 .date-input {
   cursor: pointer;
+}
+
+.empty-week {
+  width: 100%;
+  font-size: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 @media screen {
