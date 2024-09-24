@@ -5,14 +5,14 @@ export default {
   name: 'MapBase',
   data() {
     return {
-      days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      days: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'],
       hours: ['8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'],
       courses: {
-        Monday: null,
-        Tuesday: null,
-        Wednesday: null,
-        Thursday: null,
-        Friday: null
+        Lundi: null,
+        Mardi: null,
+        Mercredi: null,
+        Jeudi: null,
+        Vendredi: null
       },
       inputValue: "",
       dateInput: "",
@@ -149,7 +149,7 @@ export default {
           </template>
         </div>
         <div class="empty-week" v-else>
-          Pas de cours cette semaine
+          Pas de cours cette semaine 🏖️
         </div>
       </div>
     </div>

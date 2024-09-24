@@ -29,40 +29,40 @@ function getWorkingDays(dateInput) {
     // Calculate working days based on current day of the week
     switch (currentDayOfWeek) {
         case 0: // Sunday
-            currentDate.setDate(currentDate.getDate() + 1); // Move to Monday
+            currentDate.setDate(currentDate.getDate() + 1); // Move to Lundi
             for (let i = 0; i <= 4; i++) {
                 workingDays.push(addDays(currentDate, i));
             }
             break;
         case 6: // Saturday
-            currentDate.setDate(currentDate.getDate() + 2); // Move to Monday
+            currentDate.setDate(currentDate.getDate() + 2); // Move to Lundi
             for (let i = 0; i <= 4; i++) {
                 workingDays.push(addDays(currentDate, i));
             }
             break;
-        case 1: // Monday
+        case 1: // Lundi
             for (let i = 0; i <= 4; i++) {
                 workingDays.push(addDays(currentDate, i));
             }
             break;
-        case 2: // Tuesday
+        case 2: // Mardi
             for (let i = -1; i <= 3; i++) {
                 workingDays.push(addDays(currentDate, i));
             }
             break;
-        case 3: // Wednesday
+        case 3: // Mercredi
             for (let i = -2; i <= 2; i++) {
                 workingDays.push(addDays(currentDate, i));
             }
             break;
-        case 4: // Thursday
+        case 4: // Jeudi
             for (let i = -3; i <= 1; i++) {
                 workingDays.push(addDays(currentDate, i));
             }
             break;
-        case 5: // Friday
+        case 5: // Vendredi
             if (currentHour >= 20) {
-                currentDate.setDate(currentDate.getDate() + 3); // Move to Monday of next week
+                currentDate.setDate(currentDate.getDate() + 3); // Move to Lundi of next week
                 for (let i = 0; i <= 4; i++) {
                     workingDays.push(addDays(currentDate, i));
                 }
@@ -117,7 +117,7 @@ async function fetchAndParseOneWorkingDay(tel, date) {
 }
 
 function addDays(weekSchedule){
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+    const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi']
     const scheduleByDay = [];
     weekSchedule.forEach((day, index) => {
         const dayOfWeek = days[index];
