@@ -25,7 +25,7 @@ export default {
   },
   created() {
     this.fillInputs()
-    this.CheckMobile()
+    this.checkMobile()
   },
   mounted() {
   },
@@ -43,7 +43,7 @@ export default {
         this.dateInput = this.formatDate(new Date());
       }
     },
-    CheckMobile() {
+    checkMobile() {
       if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
         this.isMobile = true;
       }
@@ -130,7 +130,6 @@ export default {
 <template>
   <div id="app">
     <div class="timetable">
-      <h1>L'edt de fouuuuuu</h1>
       <div class="header">
         <div class="time-column"></div>
         <div v-for="day in days" :key="day" class="day">{{ day }}</div>
@@ -149,10 +148,10 @@ export default {
                  :style="{ height: ((convertHourToNumber(course.debut) - convertHourToNumber(courses[day][index-1].fin)) * 30) + 'px' }"></div>
             <div class="course"
                  :style="{ height: (calculateCourseHeight(course)-10) + 'px', backgroundColor: course.color.color, color: course.color.textColor}">
-              <span>{{ course.matiere.toLowerCase() }}</span>
-              <span>Salle : {{ course.salle }}</span>
-              <span v-if="!isMobile">Prof : {{ course.prof }}</span>
-              <span>{{ convertHourToText(course.debut) }}-{{ convertHourToText(course.fin) }}</span>
+              <span class="class">{{ course.matiere.toLowerCase() }}</span>
+              <span class="room">Salle : {{ course.salle }}</span>
+              <span class="teacher" v-if="!isMobile">Prof : {{ course.prof }}</span>
+              <span class="hours">{{ convertHourToText(course.debut) }}-{{ convertHourToText(course.fin) }}</span>
             </div>
           </template>
         </div>
@@ -165,7 +164,6 @@ export default {
       </div>
     </div>
     <div class="form">
-      <p>Entrez votre prénom et nom (prenom.nom)</p>
       <input type="text" class="input" v-model="inputValue" placeholder='Entrez "prenom.nom"'>
       <div class="date-container">
         <button class="button" @click="changeDate(-7)">⬅️</button>
@@ -185,16 +183,6 @@ export default {
   align-items: center;
   border-bottom: 1px solid #ccc;
   margin-bottom: 10px;
-}
-
-h1 {
-  text-align: center;
-}
-
-span {
-  font-size: 0.55rem;
-  text-transform: capitalize;
-  margin-bottom: 0.3rem;
 }
 
 .time-column {
@@ -228,6 +216,12 @@ span {
   display: flex;
   flex-direction: column;
   justify-content: center;
+
+  .class, .teacher, .hours, .room {
+    font-size: 0.55rem;
+    text-transform: capitalize;
+    margin-bottom: 0.3rem;
+  }
 }
 
 .course-empty {
@@ -242,10 +236,6 @@ span {
   align-items: center;
   margin-top: 10px;
   gap: 10px;
-
-  p {
-    margin-bottom: 0.5rem;
-  }
 }
 
 .input {
@@ -290,8 +280,10 @@ span {
 }
 
 @media screen and (min-width: 600px) {
-  span {
-    font-size: 0.85rem;
+  .course {
+    .class, .teacher, .hours, .room {
+      font-size: 0.85rem;
+    }
   }
 }
 </style>
