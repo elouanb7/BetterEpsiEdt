@@ -134,7 +134,7 @@ export default {
                  class="course-empty"
                  :style="{ height: ((convertHourToNumber(course.debut) - convertHourToNumber(courses[day][index-1].fin)) * 30) + 'px' }"></div>
             <div class="course"
-                 :style="{ height: calculateCourseHeight(course) + 'px', backgroundColor: course.color.color, color: course.color.textColor}">
+                 :style="{ height: (calculateCourseHeight(course)-10) + 'px', backgroundColor: course.color.color, color: course.color.textColor}">
               <span>{{ course.matiere }}</span><br>
               <span style="font-size: small">Salle : {{ course.salle }}</span><br>
               <span style="font-size: x-small">Prof : {{ course.prof }}</span><br>
