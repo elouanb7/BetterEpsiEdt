@@ -15,7 +15,8 @@ export default {
         Friday: null
       },
       inputValue: "",
-      dateInput: ""
+      dateInput: "",
+      init: true,
     }
   },
   created() {
@@ -84,7 +85,7 @@ export default {
     },
     updateUrl() {
       const baseUrl = window.location.href.split('?')[0];
-      const newUrl = baseUrl + '?name=' + encodeURIComponent(this.inputValue) + '?date=' + encodeURIComponent(this.dateInput);
+      const newUrl = baseUrl + '?name=' + encodeURIComponent(this.inputValue) + '&date=' + encodeURIComponent(this.dateInput);
       history.replaceState(null, '', newUrl);
     }
   },
@@ -92,21 +93,21 @@ export default {
     inputValue: function (newValue) {
       clearTimeout(this.nameTimeout);
       this.nameTimeout = setTimeout(() => {
-        this.retrieveSchedule(newValue);
-        this.updateUrl()
+        if (this.init === false) {
+          this.retrieveSchedule(newValue, this.dateInput);
+          this.updateUrl()
+        } else {
+          this.init = false
+        }
       }, 1500);
     },
     dateInput: function (newValue) {
-      clearTimeout(this.dateTimeout);
-      this.dateTimeout = setTimeout(() => {
-        this.retrieveSchedule(this.inputValue, newValue);
-        this.updateUrl()
-      }, 500);
+      this.retrieveSchedule(this.inputValue, newValue);
+      this.updateUrl()
     }
   },
   beforeDestroy() {
     clearTimeout(this.nameTimeout);
-    clearTimeout(this.dateTimeout);
   }
 }
 
