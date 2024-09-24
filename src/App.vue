@@ -1,8 +1,10 @@
 <script>
 import fetchAndParseSchedule from "./logic/scrapper.js";
+import LoadingSpinner from "./components/LoadingSpinner.vue";
 
 export default {
   name: 'MapBase',
+  components: {LoadingSpinner},
   data() {
     return {
       days: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'],
@@ -150,7 +152,7 @@ export default {
           </template>
         </div>
         <div class="empty-week" v-else-if="init === true">
-          Chargement<i style="margin-left: 10px" class="spinner fa-duotone fa-solid fa-loader"></i>
+          <LoadingSpinner/>
         </div>
         <div class="empty-week" v-else>
           Pas de cours cette semaine 🏖️
