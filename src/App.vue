@@ -20,10 +20,12 @@ export default {
       dateInput: "",
       coursesCount: 0,
       init: true,
+      isMobile: false
     }
   },
   created() {
     this.fillInputs()
+    this.checkMobile()
   },
   mounted() {
   },
@@ -39,6 +41,11 @@ export default {
         this.dateInput = dateParam;
       } else {
         this.dateInput = this.formatDate(new Date());
+      }
+    },
+    checkMobile() {
+      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        this.isMobile = true;
       }
     },
     formatDate(date) {
@@ -141,13 +148,10 @@ export default {
                  :style="{ height: ((convertHourToNumber(course.debut) - convertHourToNumber(courses[day][index-1].fin)) * 30) + 'px' }"></div>
             <div class="course"
                  :style="{ height: (calculateCourseHeight(course)-10) + 'px', backgroundColor: course.color.color, color: course.color.textColor}">
-              <span>{{ course.matiere }}</span><br>
-              <span style="font-size: small">Salle : {{ course.salle }}</span><br>
-              <span style="font-size: x-small">Prof : {{ course.prof }}</span><br>
-              <span
-                  style="font-size: x-small">{{ convertHourToText(course.debut) }}-{{
-                  convertHourToText(course.fin)
-                }}</span>
+              <span class="class">{{ course.matiere.toLowerCase() }}</span>
+              <span class="room">Salle : {{ course.salle }}</span>
+              <span class="teacher" v-if="!isMobile">Prof : {{ course.prof }}</span>
+              <span class="hours">{{ convertHourToText(course.debut) }}-{{ convertHourToText(course.fin) }}</span>
             </div>
           </template>
         </div>
@@ -209,6 +213,15 @@ export default {
 .course {
   border-radius: 10px;
   padding: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  .class, .teacher, .hours, .room {
+    font-size: 0.55rem;
+    text-transform: capitalize;
+    margin-bottom: 0.3rem;
+  }
 }
 
 .course-empty {
@@ -218,11 +231,11 @@ export default {
 .form {
   width: 100%;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   margin-top: 10px;
-  gap: 20px;
+  gap: 10px;
 }
 
 .input {
@@ -266,7 +279,11 @@ export default {
   }
 }
 
-@media screen {
-
+@media screen and (min-width: 600px) {
+  .course {
+    .class, .teacher, .hours, .room {
+      font-size: 0.85rem;
+    }
+  }
 }
 </style>
