@@ -149,6 +149,9 @@ export default {
             </div>
           </template>
         </div>
+        <div class="empty-week" v-else-if="init === true">
+          Chargement<i style="margin-left: 10px" class="spinner fa-duotone fa-solid fa-loader"></i>
+        </div>
         <div class="empty-week" v-else>
           Pas de cours cette semaine 🏖️
         </div>
@@ -249,6 +252,16 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media screen {
