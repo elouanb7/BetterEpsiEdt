@@ -15,21 +15,40 @@ export default {
         Friday: null
       },
       inputValue: "",
+      dateInput: ""
     }
   },
   created() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const nameParam = urlParams.get('name');
-    if (nameParam) {
-      this.inputValue = nameParam;
-    }
+    this.fillInputs()
   },
-  mounted() {},
+  mounted() {
+  },
   methods: {
-    retrieveSchedule(name){
-      fetchAndParseSchedule(name)
+    fillInputs() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const nameParam = urlParams.get('name');
+      if (nameParam) {
+        this.inputValue = nameParam;
+      }
+      const dateParam = urlParams.get('date');
+      if (dateParam) {
+        this.dateInput = dateParam;
+      } else {
+        this.dateInput = this.formatDate(new Date());
+      }
+    },
+    formatDate(date) {
+      return date.toISOString().slice(0, 10);
+    },
+    changeDate(days) {
+      const current = new Date(this.dateInput);
+      current.setDate(current.getDate() + days); // Add/subtract days
+      this.dateInput = this.formatDate(current); // Update the date input value
+    },
+    retrieveSchedule(name, date = null) {
+      fetchAndParseSchedule(name, date)
           .then(schedule => {
-            if(schedule == null){
+            if (schedule == null) {
               console.log("Invalid input.")
             }
             schedule.forEach(entry => {
@@ -65,21 +84,29 @@ export default {
     },
     updateUrl() {
       const baseUrl = window.location.href.split('?')[0];
-      const newUrl = baseUrl + '?name=' + encodeURIComponent(this.inputValue);
+      const newUrl = baseUrl + '?name=' + encodeURIComponent(this.inputValue) + '?date=' + encodeURIComponent(this.dateInput);
       history.replaceState(null, '', newUrl);
     }
   },
   watch: {
-    inputValue: function(newValue) {
-      clearTimeout(this.timeout);
-      this.timeout = setTimeout(() => {
+    inputValue: function (newValue) {
+      clearTimeout(this.nameTimeout);
+      this.nameTimeout = setTimeout(() => {
         this.retrieveSchedule(newValue);
         this.updateUrl()
       }, 1500);
+    },
+    dateInput: function (newValue) {
+      clearTimeout(this.dateTimeout);
+      this.dateTimeout = setTimeout(() => {
+        this.retrieveSchedule(this.inputValue, newValue);
+        this.updateUrl()
+      }, 500);
     }
   },
   beforeDestroy() {
-    clearTimeout(this.timeout);
+    clearTimeout(this.nameTimeout);
+    clearTimeout(this.dateTimeout);
   }
 }
 
@@ -98,26 +125,34 @@ export default {
           <div v-for="hour in hours" :key="hour" class="hour">{{ hour }}</div>
         </div>
         <div v-for="day in days" :key="day" class="day-column">
-        <template v-for="(course, index) in courses[day]" :key="course.matiere + index">
-          <div v-if="index === 0"
-               class="course-empty"
-               :style="{ height: ((convertHourToNumber(course.debut) - 8) * 30) + 'px' }"></div>
-          <div v-else-if="convertHourToNumber(course.debut) !== convertHourToNumber(courses[day][index-1].fin)"
-               class="course-empty"
-               :style="{ height: ((convertHourToNumber(course.debut) - convertHourToNumber(courses[day][index-1].fin)) * 30) + 'px' }"></div>
-          <div class="course"
-               :style="{ height: calculateCourseHeight(course) + 'px', backgroundColor: course.color.color, color: course.color.textColor}">
-            <span>{{ course.matiere }}</span><br>
-            <span style="font-size: small">Salle : {{ course.salle }}</span><br>
-            <span style="font-size: x-small">Prof : {{ course.prof }}</span><br>
-            <span style="font-size: x-small">{{convertHourToText(course.debut)}}-{{convertHourToText(course.fin)}}</span>
-          </div>
-        </template>
+          <template v-for="(course, index) in courses[day]" :key="course.matiere + index">
+            <div v-if="index === 0"
+                 class="course-empty"
+                 :style="{ height: ((convertHourToNumber(course.debut) - 8) * 30) + 'px' }"></div>
+            <div v-else-if="convertHourToNumber(course.debut) !== convertHourToNumber(courses[day][index-1].fin)"
+                 class="course-empty"
+                 :style="{ height: ((convertHourToNumber(course.debut) - convertHourToNumber(courses[day][index-1].fin)) * 30) + 'px' }"></div>
+            <div class="course"
+                 :style="{ height: calculateCourseHeight(course) + 'px', backgroundColor: course.color.color, color: course.color.textColor}">
+              <span>{{ course.matiere }}</span><br>
+              <span style="font-size: small">Salle : {{ course.salle }}</span><br>
+              <span style="font-size: x-small">Prof : {{ course.prof }}</span><br>
+              <span
+                  style="font-size: x-small">{{ convertHourToText(course.debut) }}-{{
+                  convertHourToText(course.fin)
+                }}</span>
+            </div>
+          </template>
         </div>
       </div>
     </div>
     <div class="form">
-      <input type="text" class="name-input" v-model="inputValue" placeholder='Enter your "firstname.lastname"'>
+      <input type="text" class="input" v-model="inputValue" placeholder='Enter your "firstname.lastname"'>
+      <div class="date-container">
+        <button class="button" @click="changeDate(-7)">⬅️</button>
+        <input type="date" class="input date-input" v-model="dateInput" placeholder='MM/DD/YYYY'>
+        <button class="button" @click="changeDate(7)">➡️</button>
+      </div>
     </div>
   </div>
 </template>
@@ -170,13 +205,30 @@ export default {
   justify-content: center;
   align-items: center;
   margin-top: 10px;
+  gap: 20px;
 }
 
-.name-input {
-  width: 15%;
+.input {
   border: 1px solid #ccc;
   border-radius: 4px;
   text-align: center;
+}
+
+.button {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.date-container {
+  display: flex;
+  gap: 10px;
+  min-width: 100px
+}
+
+.date-input {
+  cursor: pointer;
 }
 
 @media screen {

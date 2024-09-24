@@ -1,18 +1,29 @@
 import axios from 'axios';
 
-function getWorkingDays() {
-    const currentDate = new Date();
-    const currentDayOfWeek = currentDate.getDay();
-    const currentHour = currentDate.getHours();
-
+function getWorkingDays(dateInput) {
     // Array to hold the working days
     let workingDays = [];
+    let currentDate;
+    let currentDayOfWeek;
+    let currentHour;
 
     // Function to add days to the current date
     function addDays(date, days) {
         const result = new Date(date);
         result.setDate(result.getDate() + days);
         return result;
+    }
+
+    if (dateInput === null || dateInput === undefined) {
+        currentDate = new Date();
+        currentDayOfWeek = currentDate.getDay();
+        currentHour = currentDate.getHours();
+    }
+    else {
+        dateInput = new Date(dateInput);
+        currentDate = dateInput;
+        currentDayOfWeek = currentDate.getDay();
+        currentHour = 12
     }
 
     // Calculate working days based on current day of the week
@@ -172,11 +183,11 @@ function isStringDotString(variable) {
     return regex.test(variable);
 }
 
-export default async function fetchAndParseSchedule(tel) {
+export default async function fetchAndParseSchedule(tel, date) {
     if (!isStringDotString(tel)) {
         return null
     }
-    const workingDays = getWorkingDays();
+    const workingDays = getWorkingDays(date);
     let weekSchedule = []
     for (let i = 0; i < workingDays.length; i++) {
         await fetchAndParseOneWorkingDay(tel, workingDays[i]).then(workingDay => {
