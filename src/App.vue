@@ -52,6 +52,7 @@ export default {
           .then(schedule => {
             if (schedule == null) {
               console.log("Invalid input.")
+              return;
             }
             this.coursesCount = 0
             schedule.forEach(entry => {
@@ -154,7 +155,7 @@ export default {
       </div>
     </div>
     <div class="form">
-      <input type="text" class="input" v-model="inputValue" placeholder='Enter your "firstname.lastname"'>
+      <input type="text" class="input" v-model="inputValue" placeholder='Entrez "prenom.nom"'>
       <div class="date-container">
         <button class="button" @click="changeDate(-7)">⬅️</button>
         <input type="date" class="input date-input" v-model="dateInput" placeholder='MM/DD/YYYY'>
