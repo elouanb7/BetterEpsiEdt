@@ -26,6 +26,7 @@ export default {
   created() {
     this.fillInputs()
     this.checkMobile()
+    window.addEventListener('resize', this.checkMobile);
   },
   mounted() {
   },
@@ -44,9 +45,7 @@ export default {
       }
     },
     checkMobile() {
-      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-        this.isMobile = true;
-      }
+      this.isMobile = window.innerWidth <= 768;
     },
     formatDate(date) {
       return date.toISOString().slice(0, 10);
@@ -120,6 +119,7 @@ export default {
     }
   },
   beforeDestroy() {
+    window.removeEventListener('resize', this.checkMobile);
     clearTimeout(this.nameTimeout);
   }
 }
@@ -148,7 +148,7 @@ export default {
                  :style="{ height: ((convertHourToNumber(course.debut) - convertHourToNumber(courses[day][index-1].fin)) * 30) + 'px' }"></div>
             <div class="course"
                  :style="{ height: (calculateCourseHeight(course)-10) + 'px', backgroundColor: course.color.color, color: course.color.textColor}">
-              <span class="class">{{ course.matiere.toLowerCase() }}</span>
+              <span class="class">{{ course.matiere }}</span>
               <span class="room">Salle : {{ course.salle }}</span>
               <span class="teacher" v-if="!isMobile">Prof : {{ course.prof }}</span>
               <span class="hours">{{ convertHourToText(course.debut) }}-{{ convertHourToText(course.fin) }}</span>
@@ -218,9 +218,13 @@ export default {
   justify-content: center;
 
   .class, .teacher, .hours, .room {
-    font-size: 0.55rem;
-    text-transform: capitalize;
     margin-bottom: 0.3rem;
+  }
+  .class, .room{
+    font-size: 0.65rem;
+  }
+  .hours{
+    font-size: 0.55rem;
   }
 }
 
@@ -236,6 +240,7 @@ export default {
   align-items: center;
   margin-top: 10px;
   gap: 10px;
+  margin-left: 38px;
 }
 
 .input {
@@ -279,10 +284,13 @@ export default {
   }
 }
 
-@media screen and (min-width: 600px) {
+@media screen and (min-width: 768px) {
   .course {
-    .class, .teacher, .hours, .room {
-      font-size: 0.85rem;
+    .class, .teacher, .room {
+      font-size: small;
+    }
+    .hours {
+      font-size: x-small;
     }
   }
 }
