@@ -65,12 +65,13 @@ export default {
             this.coursesCount = 0
             schedule.forEach(entry => {
               this.courses[entry.day] = entry.courses;
+              this.courses[entry.day].date = entry.date;
               this.coursesCount += entry.courses.length;
             });
           })
           .catch(error => {
             console.error('Error:', error);
-          });
+          })
     },
     calculateCourseHeight(course) {
       const startDate = this.convertHourToNumber(course.debut)
@@ -132,7 +133,8 @@ export default {
     <div class="timetable">
       <div class="header">
         <div class="time-column"></div>
-        <div v-for="day in days" :key="day" class="day">{{ day }}</div>
+        <div v-for="day in days" :key="day" class="day">{{ day }}<br>{{ courses[day] && courses[day].date ? new Date(courses[day].date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : null }}
+        </div>
       </div>
       <div ref="timetable" class="timetable-body">
         <div class="time-column">

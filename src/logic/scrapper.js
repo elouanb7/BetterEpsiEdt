@@ -116,14 +116,15 @@ async function fetchAndParseOneWorkingDay(tel, date) {
     }
 }
 
-function addDays(weekSchedule){
+function addDays(weekSchedule, workingDays) {
     const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi']
     const scheduleByDay = [];
     weekSchedule.forEach((day, index) => {
         const dayOfWeek = days[index];
         const dayObject = {
             day: dayOfWeek,
-            courses: day
+            courses: day,
+            date: workingDays[index]
         };
         scheduleByDay.push(dayObject);
     });
@@ -194,7 +195,7 @@ export default async function fetchAndParseSchedule(tel, date) {
             weekSchedule.push(workingDay);
         })
     }
-    weekSchedule = addDays(weekSchedule);
+    weekSchedule = addDays(weekSchedule, workingDays);
     return addColorsToSchedule(weekSchedule);
 }
 
