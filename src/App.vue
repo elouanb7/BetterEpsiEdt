@@ -151,7 +151,7 @@ export default {
             <div class="course"
                  :style="{ height: (calculateCourseHeight(course)-10) + 'px', backgroundColor: course.color.color, color: course.color.textColor}">
               <span class="class">{{ course.matiere }}</span>
-              <span class="room">Salle : {{ course.salle }}</span>
+              <span class="room">Salle : {{ (course.salle.startsWith("SALLE") ? "DISTANCIEL" : course.salle) }}</span>
               <span class="teacher" v-if="!isMobile">Prof : {{ course.prof }}</span>
               <span class="hours">{{ convertHourToText(course.debut) }}-{{ convertHourToText(course.fin) }}</span>
             </div>
