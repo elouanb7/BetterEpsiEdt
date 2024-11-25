@@ -1,10 +1,12 @@
 <script>
 import fetchAndParseSchedule from "./logic/scrapper.js";
 import LoadingSpinner from "./components/LoadingSpinner.vue";
+import InfoIcon from "./assets/icons/info.svg"
+import CloseIcon from "./assets/icons/close.svg"
 
 export default {
   name: 'MapBase',
-  components: {LoadingSpinner},
+  components: {LoadingSpinner, InfoIcon, CloseIcon},
   data() {
     return {
       days: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'],
@@ -20,17 +22,42 @@ export default {
       dateInput: "",
       coursesCount: 0,
       init: true,
-      isMobile: false
+      isMobile: false,
+      tooltips: [],
+      columnWidth: 0,
     }
   },
   created() {
     this.fillInputs()
     this.checkMobile()
-    window.addEventListener('resize', this.checkMobile);
+    window.addEventListener('resize', this.handleResize);
   },
   mounted() {
+    // Ensure that the initial column width is set after rendering
+    this.updateColumnWidth();
   },
+  computed: {},
   methods: {
+    handleResize() {
+      this.checkMobile();
+      this.updateColumnWidth(); // Recalculate column width on resize
+      this.updateTooltipsPositions()
+    },
+    isHigherEnough(height) {
+      return height > 45
+    },
+    toggleTooltip(key) {
+      console.log(key)
+      const index = this.tooltips.findIndex((tooltip) => tooltip.key === key);
+      if (index !== -1) {
+        this.tooltips.splice(index, 1);
+      } else {
+        this.tooltips.push({key, value: true});
+      }
+    },
+    isTooltipVisible(key) {
+      return this.tooltips.some((tooltip) => tooltip.key === key && tooltip.value);
+    },
     fillInputs() {
       const urlParams = new URLSearchParams(window.location.search);
       const nameParam = urlParams.get('name');
@@ -47,6 +74,26 @@ export default {
     checkMobile() {
       this.isMobile = window.innerWidth <= 768;
     },
+    updateColumnWidth() {
+      // Ensure we have access to the column div and that it has been rendered
+      this.$nextTick(() => {
+        const divs = this.$refs.columnDiv;
+        if (divs) {
+          this.columnWidth = divs[0].offsetWidth;
+        }
+      });
+    },
+    updateTooltipsPositions() {
+      this.$nextTick(() => {
+        this.tooltips.forEach(tooltip => {
+          const course = this.$refs[tooltip.key];
+          /*if (divs.length > 1) {
+            this.columnWidth = divs[0].offsetWidth;
+            console.log("Tooltips width updated:", this.columnWidth);
+          }*/
+        })
+      });
+    },
     formatDate(date) {
       return date.toISOString().slice(0, 10);
     },
@@ -57,27 +104,30 @@ export default {
     },
     retrieveSchedule(name, date = null) {
       fetchAndParseSchedule(name, date)
-          .then(schedule => {
-            if (schedule == null) {
-              console.log("Invalid input.")
-              return;
-            }
-            this.coursesCount = 0
-            schedule.forEach(entry => {
+          .then((schedule) => {
+            if (!schedule) return console.log("Invalid input.");
+
+            this.coursesCount = 0;
+            schedule.forEach((entry) => {
               this.courses[entry.day] = entry.courses;
               this.courses[entry.day].date = entry.date;
               this.coursesCount += entry.courses.length;
             });
+
+            // Ensure layout has updated before calculating column width
+            this.$nextTick(() => {
+              this.updateColumnWidth();
+            });
           })
-          .catch(error => {
-            console.error('Error:', error);
-          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
     },
     calculateCourseHeight(course) {
       const startDate = this.convertHourToNumber(course.debut)
       const endDate = this.convertHourToNumber(course.fin)
       const durationInHours = endDate - startDate
-      return durationInHours * 30;
+      return durationInHours * 45;
     },
     convertHourToNumber(hourString) {
       const [hours, minutes] = hourString.split(':').map(Number);
@@ -103,26 +153,26 @@ export default {
     }
   },
   watch: {
-    inputValue: function (newValue) {
+    inputValue(newValue) {
       clearTimeout(this.nameTimeout);
       this.nameTimeout = setTimeout(() => {
-        if (this.init === false) {
+        if (!this.init) {
           this.retrieveSchedule(newValue, this.dateInput);
           this.updateUrl()
         } else {
-          this.init = false
+          this.init = false;
         }
       }, 1500);
     },
-    dateInput: function (newValue) {
+    dateInput(newValue) {
       this.retrieveSchedule(this.inputValue, newValue);
       this.updateUrl()
     }
   },
   beforeDestroy() {
-    window.removeEventListener('resize', this.checkMobile);
+    window.removeEventListener("resize", this.handleResize);
     clearTimeout(this.nameTimeout);
-  }
+  },
 }
 
 
@@ -133,27 +183,64 @@ export default {
     <div class="timetable">
       <div class="header">
         <div class="time-column"></div>
-        <div v-for="day in days" :key="day" class="day">{{ day }}<br>{{ courses[day] && courses[day].date ? new Date(courses[day].date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : null }}
+        <div v-for="day in days" :key="day" class="day">{{
+            day
+          }}<br>{{
+            courses[day] && courses[day].date ? new Date(courses[day].date).toLocaleDateString('fr-FR', {
+              day: 'numeric',
+              month: 'long'
+            }) : null
+          }}
         </div>
       </div>
       <div ref="timetable" class="timetable-body">
         <div class="time-column">
           <div v-for="hour in hours" :key="hour" class="hour">{{ hour }}</div>
         </div>
-        <div v-if="coursesCount > 0" v-for="day in days" :key="day" class="day-column">
+        <div v-if="coursesCount > 0" v-for="day in days" :key="day" class="day-column" ref="columnDiv">
           <template v-for="(course, index) in courses[day]" :key="course.matiere + index">
             <div v-if="index === 0"
                  class="course-empty"
-                 :style="{ height: ((convertHourToNumber(course.debut) - 8) * 30) + 'px' }"></div>
+                 :style="{ height: ((convertHourToNumber(course.debut) - 8) * 45) + 'px' }"></div>
             <div v-else-if="convertHourToNumber(course.debut) !== convertHourToNumber(courses[day][index-1].fin)"
                  class="course-empty"
-                 :style="{ height: ((convertHourToNumber(course.debut) - convertHourToNumber(courses[day][index-1].fin)) * 30) + 'px' }"></div>
+                 :style="{ height: ((convertHourToNumber(course.debut) - convertHourToNumber(courses[day][index-1].fin)) * 45) + 'px' }"></div>
             <div class="course"
+                 :ref="`${course.matiere + index}`"
                  :style="{ height: (calculateCourseHeight(course)-10) + 'px', backgroundColor: course.color.color, color: course.color.textColor}">
               <span class="class">{{ course.matiere }}</span>
               <span class="room">Salle : {{ (course.salle.startsWith("SALLE") ? "DISTANCIEL" : course.salle) }}</span>
-              <span class="teacher" v-if="!isMobile">Prof : {{ course.prof }}</span>
-              <span class="hours">{{ convertHourToText(course.debut) }}-{{ convertHourToText(course.fin) }}</span>
+              <span class="teacher"
+                    v-if="!isMobile && isHigherEnough(calculateCourseHeight(course)-10)">Prof : {{ course.prof }}</span>
+              <span class="hours" v-if="isHigherEnough(calculateCourseHeight(course)-10)">{{
+                  convertHourToText(course.debut)
+                }}-{{ convertHourToText(course.fin) }}</span>
+              <div class="info-button-container" @click="toggleTooltip(course.matiere + index)">
+                <button class="info-button" v-if="!isHigherEnough(calculateCourseHeight(course)-10)">
+                  <InfoIcon/>
+                </button>
+                <div v-if="isTooltipVisible(course.matiere + index)" style=""
+                     @click.stop="toggleTooltip(course.matiere + index)"
+                     :style="[{width:columnWidth-17 + 'px', 'margin-left': -(columnWidth-51) + 'px', 'margin-top': 25 + 'px'}]"
+                     class="tooltip">
+                  <div
+                      class="triangle"
+                      :style="[{left:columnWidth-53 + 'px'}]"
+                  ></div>
+                  <div class="tooltip-message">
+                    <div>
+                      <span class="teacher">Prof : {{ course.prof }}</span><br>
+                      <span class="hours">{{ convertHourToText(course.debut) }}-{{
+                          convertHourToText(course.fin)
+                        }}</span>
+                    </div>
+                    <button class="close-button">
+                      <CloseIcon/>
+                    </button>
+                  </div>
+                  <!--                  {'margin-left': (-columnWidth + 29.5) + 'px'}, {'margin-top': 10 + 'px'}-->
+                </div>
+              </div>
             </div>
           </template>
         </div>
@@ -204,7 +291,7 @@ export default {
 }
 
 .hour {
-  height: 30px; /* Adjust height as needed */
+  height: 45px; /* Adjust height as needed */
 }
 
 .day-column {
@@ -218,14 +305,19 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
 
-  .class, .teacher, .hours, .room {
-    margin-bottom: 0.3rem;
-  }
-  .class, .room{
+  .class, .room {
     font-size: 0.65rem;
   }
-  .hours{
+
+  .teacher {
+    font-size: 0.65rem;
+  }
+
+  .hours {
     font-size: 0.55rem;
   }
 }
@@ -243,6 +335,55 @@ export default {
   margin-top: 10px;
   gap: 10px;
   margin-left: 38px;
+}
+
+.info-button, .close-button {
+  background: none;
+  border: none;
+  padding: 0;
+  width: 15px;
+  height: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.close-button {
+  filter: brightness(0) invert(1);
+  margin: 3px;
+}
+
+.info-button-container {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip {
+  position: absolute;
+  height: 40px;
+  background-color: #333;
+  color: #fff;
+  padding: 8px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+}
+
+.tooltip-message {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+}
+
+.triangle {
+  position: absolute;
+  top: -20px; /* Triangle above the bubble */
+  border-width: 10px;
+  border-style: solid;
+  border-color: transparent transparent #333 transparent;
+  width: 0;
+  height: 0;
 }
 
 .input {
@@ -291,6 +432,7 @@ export default {
     .class, .teacher, .room {
       font-size: small;
     }
+
     .hours {
       font-size: x-small;
     }
