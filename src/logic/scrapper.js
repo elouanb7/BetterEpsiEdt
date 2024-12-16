@@ -79,7 +79,7 @@ function getWorkingDays(dateInput) {
 }
 
 async function fetchAndParseOneWorkingDay(tel, date) {
-    const url = 'https://corsproxy.io/?' + encodeURIComponent(`https://edtmobiliteng.wigorservices.net//WebPsDyn.aspx?Action=posETUD&serverid=C&tel=${tel}&date=${date}%208:00`);
+    const url = 'https://corsproxy.io/?' + `https://edtmobiliteng.wigorservices.net//WebPsDyn.aspx?Action=posETUD&serverid=C&tel=${tel}&date=${date}%208:00`;
     try {
         /*axios.defaults.headers.get['Content-Type'] = 'text/html; charset=utf-8';
         axios.defaults.headers.get['Origin'] = 'https://elouanb7.github.io';
