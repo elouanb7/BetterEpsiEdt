@@ -183,13 +183,19 @@ export default {
     <div class="timetable">
       <div class="header">
         <div class="time-column"></div>
-        <div v-for="day in days" :key="day" class="day">{{
-            day
-          }}<br>{{
-            courses[day] && courses[day].date ? new Date(courses[day].date).toLocaleDateString('fr-FR', {
+        <div v-for="day in days" :key="day" class="day">
+          {{ isMobile ? "" : day }}
+          <span v-if="!isMobile">
+            <br>
+          </span>
+          {{
+            courses[day] && courses[day].date ? (isMobile ? new Date(courses[day].date).toLocaleDateString('fr-FR', {
+              day: 'numeric',
+              month: 'numeric',
+            }) : new Date(courses[day].date).toLocaleDateString('fr-FR', {
               day: 'numeric',
               month: 'long'
-            }) : null
+            })) : null
           }}
         </div>
       </div>
